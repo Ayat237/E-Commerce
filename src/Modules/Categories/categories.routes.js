@@ -27,4 +27,7 @@ categoryRouter.delete ("/delete/:_id",
   errorHandler(CC.deleteCategory)
 )
 
+categoryRouter.get ("/all",
+  errorHandler(CC.getAllCategoriesWithSubCategories)
+);
 export { categoryRouter };

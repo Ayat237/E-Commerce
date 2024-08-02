@@ -26,4 +26,14 @@ brandRouter.put ("/update/:_id",
 brandRouter.delete ("/delete/:_id",
     errorHandler(BC.deleteBrand)
 )
+
+brandRouter.get ("/all",
+    errorHandler(BC.getAllBrandsWithProducts)
+)
+
+brandRouter.get ("/specific",
+    errorHandler(BC.getSpecificBrands)
+)
+
+
 export { brandRouter };

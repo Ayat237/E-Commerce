@@ -1,8 +1,9 @@
-import mongoose from "mongoose";
+import mongoose from "./global-setup.js";
 import { Schema, model } from "mongoose";
 
 const brandSchema = new Schema(
   {
+    // strings  section 
     name: {
       type: String,
       required: true,

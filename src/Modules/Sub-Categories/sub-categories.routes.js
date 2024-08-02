@@ -25,5 +25,9 @@ subCategoryRouter.put ("/update/:_id",
 subCategoryRouter.delete ("/delete/:_id",
     errorHandler(SCC.deleteSubCategory)
 )
+
+subCategoryRouter.get ("/all",
+    errorHandler(SCC.getAllSubCategoriesWithBrands)
+);
 export { subCategoryRouter };
  

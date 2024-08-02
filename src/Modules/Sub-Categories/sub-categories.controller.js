@@ -2,7 +2,7 @@
 import { nanoid } from "nanoid";
 import slugify from "slugify";
 //middlewares
-import { brandModel, categoryModel, subCategoryModel } from "../../../DB/Models/index.js";
+import { brandModel, categoryModel, productModel, subCategoryModel } from "../../../DB/Models/index.js";
 //utils
 import { ErrorClass } from "../../Utils/index.js";
 import { cloudinaryConfig, uploadFile } from "../../Utils/index.js";
@@ -146,10 +146,14 @@ export const deleteSubCategory = async(req, res, next) => {
     await cloudinaryConfig().api.delete_folder(categoryPath);
 
     //TODO :  delete relevant brands
-    await brandModel.deleteMany({
+    const deleteBrand = await brandModel.deleteMany({
         subCategoryId: _id,
     }) 
-    //TODO :  delete relevant products
+    if(deleteBrand.deletedCount){
+        const deleteProduct = await productModel.deleteMany({
+            subCategoryId: _id,
+        }) 
+    }//delete relevant products
 
     return res.status(200).json({
         status: "success",
@@ -157,3 +161,38 @@ export const deleteSubCategory = async(req, res, next) => {
     });
   
  }
+
+
+ /**
+ * @api {get} /subCategory/all -Get all subCategories paginated with its brands 
+ */
+export const getAllSubCategoriesWithBrands = async(req, res, next) => {
+    const { page = 1, limit = 2 } = req.query;
+    const skip = (page - 1) * limit;
+    // Get relevant categories with pagination
+    const subCategories = await subCategoryModel.find()
+    .limit(limit)
+    .skip(skip)
+    .select('name')
+  
+    // Fetch all subcategories
+    const brands = await brandModel.find()
+      .select("name subCategoryId")
+      .populate("subCategoryId")
+  
+      // Map subcategories to their respective categories (return array of object )
+    const subCategoryWithBrands = subCategories.map((subCategory) => {
+      const matchingBrands = brands.filter(brand =>
+        brand.subCategoryId._id.toString() === subCategory._id.toString());
+      return {
+        ...subCategory.toObject(),
+        brands: matchingBrands.map(brand => brand.toObject())
+      };
+    });
+  
+    return res.status(200).json({
+        status: "success",
+        message: "Categories and subcategories retrieved successfully",
+        subCategoryWithBrands
+    })
+  }

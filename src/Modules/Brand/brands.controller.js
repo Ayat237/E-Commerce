@@ -2,7 +2,7 @@
 import { nanoid } from "nanoid";
 import slugify from "slugify";
 //middlewares
-import { brandModel, categoryModel, subCategoryModel } from "../../../DB/Models/index.js";
+import { brandModel, categoryModel, productModel, subCategoryModel } from "../../../DB/Models/index.js";
 //utils
 import { ErrorClass } from "../../Utils/index.js";
 import { cloudinaryConfig, uploadFile } from "../../Utils/index.js";
@@ -166,10 +166,82 @@ export const deleteBrand = async(req, res, next) => {
 
 
     //TODO :  delete relevant products
+    const deleteProduct  = await productModel.deleteMany({
+        brandId : _id,
+    }) 
 
     // send response
     return res.status(200).json({
         status: "success",
         message: "brand deleted successfully",
+    });
+}
+
+
+/**
+ * @api {get} /brands/all -Get all brands with its products 
+ */
+export const getAllBrandsWithProducts = async(req, res, next) => {
+    const { page = 1, limit = 2 } = req.query;
+    const skip = (page - 1) * limit;
+    // Get relevant categories with pagination
+    const brands = await brandModel.find()
+    .limit(limit)
+    .skip(skip)
+    .select('name')
+  
+    // Fetch all subcategories
+    const products = await productModel.find()
+      .select("name brandId")
+      .populate("brandId")
+  
+      // Map subcategories to their respective categories (return array of object )
+    const brandsWithProducts = brands.map((brand) => {
+      const matchingProducts = products.filter(product =>
+        product.brandId._id.toString() === brand._id.toString());
+      return {
+        ...brand.toObject(),
+        products: matchingProducts.map(product => product.toObject())
+      };
+    });
+  
+    return res.status(200).json({
+        status: "success",
+        message: "Categories and subcategories retrieved successfully",
+        brandsWithProducts
+    })
+}
+
+
+/**
+ * @api {get} /brands/specific -Get brands for specific subCategory or category or name
+ */
+export const getSpecificBrands = async(req, res, next) => {
+    const { name, categoryId, subCategoryId } = req.query;
+
+    let brands = {};
+    if(name){
+        brands = await brandModel.find({
+            name: name,
+        })
+    }else if(categoryId){
+        brands = await brandModel.find({
+            categoryId: categoryId
+        })
+    }else if(subCategoryId){
+        brands = await brandModel.find({
+            subCategoryId: subCategoryId
+        })
+    }
+
+    if (!brands) {
+        return next(new ErrorClass("Brands not found", 404, "Brands not found"));
+    }
+
+    // send response
+    return res.status(200).json({
+        status: "success",
+        message: "Brands found successfully",
+        brands,
     });
 }

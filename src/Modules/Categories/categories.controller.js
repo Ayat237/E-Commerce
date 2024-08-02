@@ -2,7 +2,7 @@
 import { nanoid } from "nanoid";
 import slugify from "slugify";
 //middlewares
-import { brandModel, categoryModel, subCategoryModel } from "../../../DB/Models/index.js";
+import { brandModel, categoryModel, productModel, subCategoryModel } from "../../../DB/Models/index.js";
 //utils
 import { ErrorClass } from "../../Utils/index.js";
 import { cloudinaryConfig, uploadFile } from "../../Utils/index.js";
@@ -150,7 +150,12 @@ export const deleteCategory = async (req, res, next) => {
   if(deleteSubCategory.deletedCount){
     const deleteBrand = await brandModel.deleteMany({
       categoryId : _id
-    })
+    })//delete relevant brands
+    if(deleteBrand.deletedCount){
+      const deleteProduct = await productModel.deleteMany({
+        categoryId : _id
+      })//delete relevant products
+    }
   }
   //TODO :  delete relevant products
   
@@ -160,3 +165,40 @@ export const deleteCategory = async (req, res, next) => {
     message: "Category deleted successfully",
   });
 };
+
+
+/**
+ * @api {get} /subCategory/all -Get all categories paginated with its subcatgories subCategory
+ */
+export const getAllCategoriesWithSubCategories = async(req, res, next) => {
+  const { page = 1, limit = 2 } = req.query;
+  const skip = (page - 1) * limit;
+  // Get relevant categories with pagination
+  const categories = await categoryModel.find()
+  .limit(limit)
+  .skip(skip)
+  .select('name')
+
+  // Fetch all subcategories
+  const subCategories = await subCategoryModel.find()
+    .select("name categoryId")
+    .populate("categoryId")
+
+    // Map subcategories to their respective categories (return array of object )
+  const categoryWithSubCategories = categories.map((category) => {
+    const matchingSubCategories = subCategories.filter(subCategory =>
+      subCategory.categoryId._id.toString() === category._id.toString());
+    return {
+      ...category.toObject(),
+      subCategories: matchingSubCategories.map(subCategory => subCategory.toObject())
+    };
+  });
+
+  return res.status(200).json({
+      status: "success",
+      message: "Categories and subcategories retrieved successfully",
+      data: {
+        categoryWithSubCategories
+      },
+  })
+}

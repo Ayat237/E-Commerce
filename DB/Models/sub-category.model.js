@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from "./global-setup.js";
 import { Schema, model } from "mongoose";
 
 const subCategorySchema = new Schema(

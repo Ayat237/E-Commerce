@@ -1,8 +1,11 @@
-import mongoose from "mongoose";
+import mongoose from "./global-setup.js";
 import { Schema, model } from "mongoose";
+import slugify from "slugify";
+import { Badges, calculatePrice, DiscountType } from "../../src/Utils/index.js";
 
 const productSchema = new Schema(
   {
+    // string section 
     name: {
       type: String,
       required: true,
@@ -11,7 +14,12 @@ const productSchema = new Schema(
     slug: {
       type: String,
       required: true,
-      unique: true,
+      default : function () {
+        return slugify(this.name, {
+            lower: true ,
+            replacement : "_"
+        });
+      }
     },
     overview : {
         type: String,
@@ -19,56 +27,71 @@ const productSchema = new Schema(
     },
     badges:{
         type : String,
-        enum : ['new','sale','best seller'],
-        default : 'new'
+        enum : Object.values(Badges)
     },
     specs :{
         type : Object
     },
+    // number section 
     price : {
         type: Number,
-        required: true
+        required: true,
+        min : 50
     },
     appliedDiscount : {
         amount : {
             type : Number,
+            min : 0,
             default : 0
         },
         type : {
             type : String,
-            enum : ['percentage','fixed'],
-            default : 'percentage'
+            enum : Object.values(DiscountType),
+            default : DiscountType.PERCENTAGE
         }
-    },
-    appliedPrice : {
+    },// saving price
+    appliedPrice : { 
         type: Number,
-        required: true
-    },
+        required: true,
+        default : function() {
+            return calculatePrice(this.price, this.appliedDiscount);
+        }
+    },// now > price or (price - discount)
     stock :{
         type: Number,
-        required: true
+        required: true,
+        min : 0
     },
     rating : {
         type: Number,
-        default: 0
+        default: 0,
+        min: 0,
+        max: 5
     },
-    Images : {
+    //Images
+    images : {
         URLs:[{
+            public_id : {
+                type: String,
+                required: true,
+                unique : true
+            },
             secure_url : {
                 type: String,
                 required: true
-            },
-            public_id : {
-                type: String,
-                required: true
             }
+        }],
+        customId : {
+            type: String,
+            required: true,
+            unique : true
         }
-      ]
     },
+    // IDs section 
     createdBy : {
         type: Schema.Types.ObjectId,
         ref: "user",
-        required: true,
+        required: false, //TODO : make true when user added
     },
     categoryId : {
         type: Schema.Types.ObjectId,

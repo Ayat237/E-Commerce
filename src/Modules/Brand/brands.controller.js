@@ -4,7 +4,7 @@ import slugify from "slugify";
 //middlewares
 import { brandModel, categoryModel, productModel, subCategoryModel } from "../../../DB/Models/index.js";
 //utils
-import { ErrorClass } from "../../Utils/index.js";
+import { ApiFeatureWithFind, ErrorClass } from "../../Utils/index.js";
 import { cloudinaryConfig, uploadFile } from "../../Utils/index.js";
 
 /**
@@ -182,13 +182,11 @@ export const deleteBrand = async(req, res, next) => {
  * @api {get} /brands/all -Get all brands with its products 
  */
 export const getAllBrandsWithProducts = async(req, res, next) => {
-    const { page = 1, limit = 2 } = req.query;
-    const skip = (page - 1) * limit;
-    // Get relevant categories with pagination
-    const brands = await brandModel.find()
-    .limit(limit)
-    .skip(skip)
-    .select('name')
+
+    const mongooseQuery = brandModel.find();
+    const apiFeature = new ApiFeatureWithFind(mongooseQuery,req.query)
+    .pagination();
+    const brands = await apiFeature.mongooseQuery;
   
     // Fetch all subcategories
     const products = await productModel.find()

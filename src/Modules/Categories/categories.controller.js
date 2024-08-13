@@ -4,7 +4,7 @@ import slugify from "slugify";
 //middlewares
 import { brandModel, categoryModel, productModel, subCategoryModel } from "../../../DB/Models/index.js";
 //utils
-import { ErrorClass } from "../../Utils/index.js";
+import { ApiFeatureWithFind, ErrorClass } from "../../Utils/index.js";
 import { cloudinaryConfig, uploadFile } from "../../Utils/index.js";
 
 /**
@@ -171,18 +171,17 @@ export const deleteCategory = async (req, res, next) => {
  * @api {get} /subCategory/all -Get all categories paginated with its subcatgories subCategory
  */
 export const getAllCategoriesWithSubCategories = async(req, res, next) => {
-  const { page = 1, limit = 2 } = req.query;
-  const skip = (page - 1) * limit;
-  // Get relevant categories with pagination
-  const categories = await categoryModel.find()
-  .limit(limit)
-  .skip(skip)
-  .select('name')
-
+  
+  const mongooseQuery = categoryModel.find();
+  const apiFeature = new ApiFeatureWithFind(mongooseQuery,req.query)
+  .pagination();
+  const categories = await apiFeature.mongooseQuery;
+  
   // Fetch all subcategories
   const subCategories = await subCategoryModel.find()
     .select("name categoryId")
     .populate("categoryId")
+    .lean()
 
     // Map subcategories to their respective categories (return array of object )
   const categoryWithSubCategories = categories.map((category) => {
@@ -190,7 +189,7 @@ export const getAllCategoriesWithSubCategories = async(req, res, next) => {
       subCategory.categoryId._id.toString() === category._id.toString());
     return {
       ...category.toObject(),
-      subCategories: matchingSubCategories.map(subCategory => subCategory.toObject())
+      subCategories: matchingSubCategories
     };
   });
 

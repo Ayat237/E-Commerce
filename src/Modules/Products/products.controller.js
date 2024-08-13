@@ -4,9 +4,9 @@ import slugify from "slugify";
 //middlewares
 import { brandModel, productModel } from "../../../DB/Models/index.js";
 //utils
-import { calculatePrice, cloudinaryConfig, ErrorClass } from "../../Utils/index.js";
+import { ApiFeatureWithPlugin, calculatePrice, cloudinaryConfig, ErrorClass } from "../../Utils/index.js";
 import { uploadFile } from "../../Utils/index.js";
-
+  
 /**
  * @api {post} /product/create  -add a new product
  */
@@ -204,22 +204,17 @@ export const updateProduct = async (req, res, next) => {
  * @api {get} /product/list/  -get product
  */
 export const getAllProduct = async (req, res, next) => {
-  const { page = 1, limit = 2 } = req.query;
-  const skip = (page - 1) * limit;
-  const products = await productModel.paginate(
-    {},
-    {
-      page,
-      limit,
-      skip,
-      select: "-images  -specs -overview",
-      sort: { price: 1 },
-    }
-  );
+  const mongooseQuery = productModel;
+  const apiFeature = new ApiFeatureWithPlugin(mongooseQuery,req.query)
+  .pagination()
+  .sort()
+  .filters();
+
+  const products =  await apiFeature.mongooseQuery;
   return res.status(200).json({
     status: "success",
     message: "Product retrieved successfully",
-    data: products,
+    data: await products,
   });
 };
 

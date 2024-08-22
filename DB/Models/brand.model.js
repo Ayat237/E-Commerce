@@ -1,5 +1,6 @@
 import mongoose from "./global-setup.js";
 import { Schema, model } from "mongoose";
+import { productModel } from "./product.model.js";
 
 const brandSchema = new Schema(
   {
@@ -50,6 +51,12 @@ const brandSchema = new Schema(
   { timestamps: true }
 );
 
-// TODO:: mongoose.models.brand -> to user model if exist not recreate model
+brandSchema.post("findOneAndDelete",async function(){
+  const _id = this.getQuery()._id;
+  const deleteProduct  = await productModel.deleteMany({
+    brandId : _id,
+  }) 
+})
+
 export const brandModel =
   mongoose.models.brandModel || model("brand", brandSchema);

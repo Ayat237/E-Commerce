@@ -59,7 +59,7 @@ export class ApiFeatureWithFind {
       this.mongooseQuery = this.mongooseQuery.skip(skip).limit(+limit);
       return this;
     }
-  
+    //sort[price] desc
     sort() {
       const { sort } = this.query;
       if (sort) {

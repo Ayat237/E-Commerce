@@ -1,5 +1,7 @@
 import mongoose from "./global-setup.js";
 import { Schema, model } from "mongoose";
+import { productModel } from "./product.model.js";
+import { brandModel } from "./brand.model.js";
 
 const subCategorySchema = new Schema(
   {
@@ -35,15 +37,29 @@ const subCategorySchema = new Schema(
       required: true,
       unique: true,
     },
-    categoryId : {
-        type: Schema.Types.ObjectId,
-        ref: "category",
-        required: true
-    }
+    categoryId: {
+      type: Schema.Types.ObjectId,
+      ref: "category",
+      required: true,
+    },
   },
   { timestamps: true }
 );
 
-// TODO:: mongoose.models.category -> to user model if exist not recreate model
+subCategorySchema.post("findOneAndDelete",async function(){
+  const _id = this.getQuery()._id;
+
+  const deleteBrand = await brandModel.deleteMany({
+    subCategoryId: _id,
+  });
+
+  if (deleteBrand.deletedCount) {
+    const deleteProduct = await productModel.deleteMany({
+      subCategoryId: _id,
+    });
+  } //delete relevant products
+});
+
+
 export const subCategoryModel =
   mongoose.models.subCategoryModel || model("subCategory", subCategorySchema);

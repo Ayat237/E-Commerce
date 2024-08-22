@@ -1,5 +1,8 @@
+import { brandModel } from "./brand.model.js";
 import mongoose from "./global-setup.js";
 import { Schema, model } from "mongoose";
+import { productModel } from "./product.model.js";
+import { subCategoryModel } from "./sub-category.model.js";
 
 const categorySchema = new Schema(
   {
@@ -38,6 +41,29 @@ const categorySchema = new Schema(
   },
   { timestamps: true }
 );
+
+categorySchema.post("findOneAndDelete",async function(  ){
+  const _id = this.getQuery()._id;
+  //delete relevant subcategories
+  const deleteSubCategory = await subCategoryModel.deleteMany({
+  })
+    categoryId: _id,
+
+  console.log("subcategory deleted successfully");
+  if(deleteSubCategory.deletedCount){
+    const deleteBrand = await brandModel.deleteMany({
+      categoryId : _id
+    })//delete relevant brands
+    console.log("brands deleted successfully");
+    if(deleteBrand.deletedCount){
+      const deleteProduct = await productModel.deleteMany({
+        categoryId : _id
+      })//delete relevant products
+      console.log("product deleted successfully");
+    }
+  }
+
+})
 
 // TODO:: mongoose.models.category -> to user model if exist not recreate model
 export const categoryModel =

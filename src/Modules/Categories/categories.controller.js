@@ -131,7 +131,7 @@ export const deleteCategory = async (req, res, next) => {
   const { _id } = req.params
 
   //find the category 
-  const category = await categoryModel.findByIdAndDelete(_id);
+  const category = await categoryModel.findOneAndDelete({_id});
   if(!category) {
     return next(new ErrorClass("Category not found", 404, "Category not found"));
   };
@@ -142,22 +142,7 @@ export const deleteCategory = async (req, res, next) => {
   // delete folder
   await cloudinaryConfig().api.delete_folder(categoryPath);
 
-  //delete relevant subcategories
-  const deleteSubCategory = await subCategoryModel.deleteMany({
-    categoryId: _id,
-  })
-  //delete relevant brands
-  if(deleteSubCategory.deletedCount){
-    const deleteBrand = await brandModel.deleteMany({
-      categoryId : _id
-    })//delete relevant brands
-    if(deleteBrand.deletedCount){
-      const deleteProduct = await productModel.deleteMany({
-        categoryId : _id
-      })//delete relevant products
-    }
-  }
-  //TODO :  delete relevant products
+  
   
   // Send the response
   res.status(200).json({

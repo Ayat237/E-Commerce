@@ -133,7 +133,7 @@ export const updateSubCategory = async(req, res, next) => {
 export const deleteSubCategory = async(req, res, next) => {
     const {_id} = req.params;
  
-    const subCategory = await subCategoryModel.findByIdAndDelete(_id).populate("categoryId");
+    const subCategory = await subCategoryModel.findOneAndDelete({_id}).populate("categoryId");
     if (!subCategory) {
         return next(new ErrorClass("Subcategory not found", 404, "Subcategory not found"));
     }
@@ -145,15 +145,6 @@ export const deleteSubCategory = async(req, res, next) => {
     // delete folder
     await cloudinaryConfig().api.delete_folder(categoryPath);
 
-    //TODO :  delete relevant brands
-    const deleteBrand = await brandModel.deleteMany({
-        subCategoryId: _id,
-    }) 
-    if(deleteBrand.deletedCount){
-        const deleteProduct = await productModel.deleteMany({
-            subCategoryId: _id,
-        }) 
-    }//delete relevant products
 
     return res.status(200).json({
         status: "success",

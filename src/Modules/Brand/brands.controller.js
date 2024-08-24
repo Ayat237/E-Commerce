@@ -145,7 +145,7 @@ export const updateBrand = async(req, res, next) => {
  */
 export const deleteBrand = async(req, res, next) => {
     const { _id } = req.params;
-    const brand = await brandModel.findByIdAndDelete(_id).populate([{
+    const brand = await brandModel.findOneAndDelete({_id}).populate([{
         path: "categoryId",
     },{
         path: "subCategoryId",
@@ -163,12 +163,6 @@ export const deleteBrand = async(req, res, next) => {
     await cloudinaryConfig().api.delete_resources_by_prefix(brandPath);
     // delete folder
     await cloudinaryConfig().api.delete_folder(brandPath);
-
-
-    //TODO :  delete relevant products
-    const deleteProduct  = await productModel.deleteMany({
-        brandId : _id,
-    }) 
 
     // send response
     return res.status(200).json({

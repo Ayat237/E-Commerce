@@ -1,16 +1,29 @@
+import { nanoid } from "nanoid";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
-import { userModel } from "../../../DB/Models/user.model.js";
+import { addressModel, userModel } from "../../../DB/Models/index.js";
 import { sendEmail } from "../../Services/sendEmail.service.js";
 import { ErrorClass } from "../../Utils/error-class.utils.js";
-import { nanoid } from "nanoid";
 
 /**
  * @api { POST} /user/add - Add a new user
  */
 export const signUp = async (req, res, next) => {
-  const { username, email, password, age, phoneNumbers, gender, userType } =
-    req.body;
+  const {
+    username,
+    email,
+    password,
+    age,
+    phoneNumbers,
+    gender,
+    userType,
+    country,
+    city,
+    postalCode,
+    buildingNumber,
+    floorNumber,
+    addressLabel,
+  } = req.body;
 
   const isEmailExist = await userModel.findOne({ email });
   if (isEmailExist) {
@@ -50,10 +63,23 @@ export const signUp = async (req, res, next) => {
     userType,
   });
 
+  //create address instance
+  const address = new addressModel({
+    userId: userData._id,
+    country,
+    city,
+    postalCode,
+    buildingNumber,
+    floorNumber,
+    addressLabel,
+    isDefault: true,
+  });
+
   const newUser = await userData.save();
+  const savedAddress = await address.save();
   return res
     .status(201)
-    .json({ msg: "User added successfully", data: newUser });
+    .json({ msg: "User added successfully", data: newUser,savedAddress: savedAddress});
 };
 
 /**
@@ -121,7 +147,7 @@ export const refreshToken = async (req, res, next) => {
     `<a href = '${link}' >confirm</a>`
   );
 
-  return res.status(200).json({ msg: "Email confirmed successfully" });
+  return res.status(200).json({ msg: "token refreshed successfully" });
 };
 
 /**

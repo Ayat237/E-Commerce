@@ -18,6 +18,7 @@ app.use("/subCategories", router.subCategoryRouter);
 app.use("/brands", router.brandRouter);
 app.use("/user", router.userRouter);
 app.use("/address", router.addressRouter);
+app.use("/cart", router.cartRouter);
 
 
 app.use('/*', (req, res,next) =>{

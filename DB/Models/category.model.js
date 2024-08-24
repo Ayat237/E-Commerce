@@ -65,6 +65,8 @@ categorySchema.post("findOneAndDelete",async function(  ){
 
 })
 
+
+
 // TODO:: mongoose.models.category -> to user model if exist not recreate model
 export const categoryModel =
   mongoose.models.categoryModel || model("category", categorySchema);

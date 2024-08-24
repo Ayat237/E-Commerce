@@ -5,11 +5,11 @@ Developed an e-commerce platform like noon website that delivers online shopping
 -Categories✅
 -Sub-Categories✅
 -Brands✅
--Users
--Addresses
+-Users ✅
+-Addresses ✅
 -Reviews
 -Wishlists
--Cart
+-Cart ✅
 -Coupons
 -Orders
 -Payments

@@ -79,7 +79,11 @@ export const signUp = async (req, res, next) => {
   const savedAddress = await address.save();
   return res
     .status(201)
-    .json({ msg: "User added successfully", data: newUser,savedAddress: savedAddress});
+    .json({
+      msg: "User added successfully",
+      data: newUser,
+      savedAddress: savedAddress,
+    });
 };
 
 /**
@@ -256,7 +260,7 @@ export const forgetPassword = async (req, res, next) => {
 };
 
 /**
- * @api { patch } /user/resetPassword -reset p  assword
+ * @api { patch } /user/resetPassword -reset password
  */
 export const resetPassword = async (req, res, next) => {
   const { code, password, CPassword } = req.body;
@@ -283,6 +287,9 @@ export const resetPassword = async (req, res, next) => {
   return res.status(200).json({ msg: "Password reset successfully" });
 };
 
+/**
+ * @api { GET } /user -get user profile
+ */
 export const getProfile = async (req, res, next) => {
   const userId = req.authUser._id;
   const user = await userModel.findById(userId);
@@ -301,6 +308,9 @@ export const getProfile = async (req, res, next) => {
   });
 };
 
+/**
+ * @api { patch } /user/delete -delete user account
+ */
 export const deleteAccount = async (req, res, next) => {
   const userId = req.authUser._id;
 

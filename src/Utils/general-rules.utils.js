@@ -15,7 +15,7 @@ const userNameValidation =(value, helper) => {
 };
 
 export const generalRules = {
-  id: Joi.string().custom(objectIdValidation).required(),
+  id: Joi.custom(objectIdValidation).required(),
   userName: Joi.string().custom(userNameValidation).required(),
   email : Joi.string().email({
     tlds:{ allow: ["com"]},

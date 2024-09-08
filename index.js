@@ -4,7 +4,7 @@ import { globaleResponse } from "./src/Middlewares/index.js";
 import db_connection from "./DB/connection.js";
 import * as router from "./src/Modules/index.js";
 import { ErrorClass } from "./src/Utils/error-class.utils.js";
-import { cronJobOne } from "./src/Utils/crons.utils.js";
+import { disableCoupons } from "./src/Utils/crons.utils.js";
 
 config();
 
@@ -21,6 +21,7 @@ app.use("/user", router.userRouter);
 app.use("/address", router.addressRouter);
 app.use("/cart", router.cartRouter);
 app.use("/coupon", router.couponRouter);
+app.use("/order", router.orderRouter);
 
 app.use('/*', (req, res,next) =>{
     return next(new ErrorClass(`Invalid URL : ${req.originalUrl}`,404))
@@ -28,6 +29,6 @@ app.use('/*', (req, res,next) =>{
 app.use(globaleResponse);
 
 db_connection();
+disableCoupons();
 
-cronJobOne();
 app.listen(port, () => console.log(`app listening on port ${port}!`));

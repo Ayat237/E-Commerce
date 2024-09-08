@@ -66,9 +66,9 @@ export const updateCouponSchema = {
   params: Joi.object({
     couponId: generalRules.id.required(),
   }),
-//   authUser: Joi.object({
-//     _id: generalRules.id.required(),
-//   }).options({ allowUnknown: true }),
+  authUser: Joi.object({
+    _id: generalRules.id.required(),
+  }).options({ allowUnknown: true }),
 };
 
 
@@ -80,7 +80,7 @@ export const disableEnableCouponSchema = {
   params: Joi.object({
     couponId: generalRules.id.required(),
   }),
-//   authUser: Joi.object({
-//     _id: generalRules.id.required(),
-//   }).options({ allowUnknown: true }),
+  authUser: Joi.object({
+    _id: generalRules.id.required(),
+  }).options({ allowUnknown: true }),
 };

@@ -10,6 +10,6 @@ Developed an e-commerce platform like noon website that delivers online shopping
 -Reviews
 -Wishlists
 -Cart ✅
--Coupons
--Orders
+-Coupons ✅
+-Orders ✅
 -Payments

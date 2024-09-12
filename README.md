@@ -7,9 +7,9 @@ Developed an e-commerce platform like noon website that delivers online shopping
 -Brands✅
 -Users ✅
 -Addresses ✅
--Reviews
+-Reviews ✅
 -Wishlists
 -Cart ✅
 -Coupons ✅
 -Orders ✅
--Payments
+-Payments ✅

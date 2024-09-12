@@ -32,3 +32,10 @@ export const  orderStatus = {
     DROPPED: 'dropped',
     ONWAY: 'onway',
 }
+
+
+export const  reviewStatus = {
+  PENDING: 'pending',
+  APPROVED: 'approved',
+  REJECTED:'rejected',
+}

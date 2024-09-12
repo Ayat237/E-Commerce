@@ -22,6 +22,7 @@ app.use("/address", router.addressRouter);
 app.use("/cart", router.cartRouter);
 app.use("/coupon", router.couponRouter);
 app.use("/order", router.orderRouter);
+app.use("/review", router.reviewRouter);
 
 app.use('/*', (req, res,next) =>{
     return next(new ErrorClass(`Invalid URL : ${req.originalUrl}`,404))

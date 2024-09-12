@@ -88,6 +88,7 @@ const orderSchema = new Schema(
     },
     deliverdAt:Date,
     canceledAt:Date,
+    payment_intent : String, 
     },
   { timestamps: true }
 );

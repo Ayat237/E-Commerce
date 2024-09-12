@@ -11,10 +11,14 @@ import {
 } from "./Utils/coupon-validation.utils.js";
 import { productModel } from "../../../DB/Models/product.model.js";
 import { couponModel } from "../../../DB/Models/coupon.model.js";
+import { ApiFeatureWithFind } from "../../Utils/Api_Feature.utils.js";
 import {
-  ApiFeatureWithFind,
-  ApiFeatureWithPlugin,
-} from "../../Utils/Api_Feature.utils.js";
+  confirmIntent,
+  createCheckoutCoupon,
+  createCheckoutSessions,
+  createPaymentIntent,
+  refundPayment,
+} from "../../Payment-Handler/stripe.js";
 
 export const createOrder = async (req, res, next) => {
   const userId = req.authUser._id;
@@ -247,3 +251,100 @@ export const listOrders = async (req, res, next) => {
     data: orders,
   });
 };
+
+export const paymentWithStripe = async (req, res, next) => {
+  const { orderId } = req.params;
+  const userId = req.authUser._id;
+  const order = await orderModel.findOne({
+    _id: orderId,
+    userId,
+    orderStatus: orderStatus.PENDING,
+  });
+  if (!order) {
+    return next(new ErrorClass("Order not found", 404, "Order not found"));
+  }
+  // Create a PaymentIntent with the order amount
+  const paymentObject = {
+    customer_email: req.authUser.email,
+    metadata: {
+      orderId: order._id.toString(),
+    },
+    discounts: [],
+    line_items: order.products.map((p) => {
+      return {
+        price_data: {
+          currency: "egp",
+          unit_amount: p.price * 100,
+          product_data: {
+            name: req.authUser.username,
+          },
+        },
+        quantity: p.quantity,
+      };
+    }),
+  };
+
+  if (order.couponId) {
+    const stripCoupon = await createCheckoutCoupon({
+      couponId: order.couponId,
+    });
+    if (stripCoupon.status) {
+      return next(new ErrorClass(stripCoupon.message, 400));
+    }
+    paymentObject.discounts = [
+      {
+        coupon: stripCoupon.id,
+      },
+    ];
+  }
+
+  const createCheckoutSession = await createCheckoutSessions(paymentObject);
+
+  const paymentIntent = await createPaymentIntent({
+    amount: order.total,
+    currency:"egp"
+  })
+  order.payment_intent = paymentIntent.id;
+  await order.save();
+
+  res.status(200).json({
+    status: "success",
+    message: "Payment intent created successfully",
+    data: createCheckoutSession,
+    paymentIntent: paymentIntent
+  });
+};
+
+export const stripWebHook = async (req, res, next)=>{
+  const  orderId = req.body.data.object.metadata.orderId;
+  const  confirmOrder = await orderModel.findByIdAndUpdate(orderId,{
+    orderStatus : orderStatus.CONFIRMED,
+  })
+
+  const confirmPaymentIntent = await confirmIntent({
+    paymentIntentId : confirmOrder.payment_intent,
+  })
+  return res.status(200).json({msg:"payment recived successfuly",confirmOrder})
+}
+
+export const refundPaymentData = async(req, res, next)  =>{
+  const  {orderId} = req.params;
+  const  order = await orderModel.findOne({
+    _id: orderId,
+    orderStatus: orderStatus.CONFIRMED,
+  })
+  if(!order){
+    return next(new ErrorClass("Order not found", 404, "Order not found"))
+  }
+  
+  const refund = await refundPayment({
+    paymentIntentId: order.payment_intent
+  });
+  if(refund.status){
+    return next(new ErrorClass(refund.message, 400));
+  }
+
+  order.orderStatus = orderStatus.REFUNDED;
+  await order.save();
+  res.status(200).json({msg:"Refund successfuly", refund})
+}

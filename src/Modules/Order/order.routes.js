@@ -36,10 +36,32 @@ orderRouter.put(
 );
 
 orderRouter.get(
-    "/",
-    errorHandler(authenticatation()),
-    errorHandler(autherization(systemRoles.USER)),
-    //errorHandler(validation(valid.createorderSchema)),
-    errorHandler(controller.listOrders)
-  );
+  "/",
+  errorHandler(authenticatation()),
+  errorHandler(autherization(systemRoles.USER)),
+  //errorHandler(validation(valid.createorderSchema)),
+  errorHandler(controller.listOrders)
+);
+
+orderRouter.post(
+  "/stripePay/:orderId",
+  errorHandler(authenticatation()),
+  errorHandler(autherization(systemRoles.USER)),
+  //errorHandler(validation(valid.createorderSchema)),
+  errorHandler(controller.paymentWithStripe)
+);
+
+orderRouter.post(
+  "/webhook",
+  errorHandler(controller.stripWebHook)
+);
+
+orderRouter.post(
+  "/refund/:orderId",
+  errorHandler(authenticatation()),
+  errorHandler(autherization(systemRoles.ADMIN)),
+  //errorHandler(validation(valid.createorderSchema)),
+  errorHandler(controller.refundPaymentData)
+);
+
 export { orderRouter };

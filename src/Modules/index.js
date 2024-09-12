@@ -7,3 +7,4 @@ export * from "./Address/address.routes.js"
 export * from "./Cart/cart.routes.js";
 export * from "./Coupon/coupon.routes.js";
 export * from "./Order/order.routes.js";
+export * from "./Reviews/reviews.routes.js";

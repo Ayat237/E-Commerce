@@ -110,8 +110,14 @@ const productSchema = new Schema(
     }
 
 },
-  { timestamps: true }
+  { timestamps: true , toJSON : { virtuals: true }, toObject : { virtuals: true}}
 );
+
+productSchema.virtual('Reviews', {
+    ref: 'review',
+    localField: '_id',
+    foreignField: 'productId'
+  });
 
 // TODO:: mongoose.models.product -> to user model if exist not recreate model
 export const productModel =

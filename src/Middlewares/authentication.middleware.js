@@ -31,6 +31,7 @@ export const authenticatation =()=>{
 
         // user data 
         req.authUser = userExists;
+        
         next();
     }
 }

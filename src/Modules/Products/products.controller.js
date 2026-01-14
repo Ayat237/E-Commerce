@@ -4,7 +4,7 @@ import slugify from "slugify";
 //middlewares
 import { brandModel, productModel } from "../../../DB/Models/index.js";
 //utils
-import { ApiFeatureWithPlugin, calculatePrice, cloudinaryConfig, ErrorClass } from "../../Utils/index.js";
+import { ApiFeatureWithFind, ApiFeatureWithPlugin, calculatePrice, cloudinaryConfig, ErrorClass, reviewStatus } from "../../Utils/index.js";
 import { uploadFile } from "../../Utils/index.js";
   
 /**
@@ -204,8 +204,11 @@ export const updateProduct = async (req, res, next) => {
  * @api {get} /product/list/  -get product
  */
 export const getAllProduct = async (req, res, next) => {
-  const mongooseQuery = productModel;
-  const apiFeature = new ApiFeatureWithPlugin(mongooseQuery,req.query)
+  const mongooseQuery = productModel.find().populate([{
+    path: "Reviews",
+    match : {reviewStatus : reviewStatus.APPROVED}
+  }]);
+  const apiFeature = new ApiFeatureWithFind(mongooseQuery,req.query)
   .pagination()
   .sort()
   .filters();
